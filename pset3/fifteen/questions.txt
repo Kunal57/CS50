@@ -1,0 +1,9 @@
+questions.txt
+
+Computer Science 50
+Problem Set 3
+
+0. The framework allows for 3x3, 4x4, 5x5, 6x6, 7x7, 8x8, and 9x9 board dimensions.
+1. The games board is represented using a 2D array.
+2. The greet function is called to greet the players at the beginning of the game.
+3. I need to implement the init, draw, move, and won functions.
