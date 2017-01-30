@@ -1,0 +1,38 @@
+0.  BMP (Bitmap) with 24 bits per pixal are common meaning it supports 16.7 million colors.
+    GIF (Graphics Interchange Format) supports 256 colors.
+    JPEG (Joint Photographic Experts Group) supports 16 million colors.
+    PNG (Portable Network Graphic) supports 16 million colors.
+1.  GIF
+2.  Lossless and Lossy are terms that describe whether or not all of the original data within a compression file can be recovered when the file is uncompressed. Lossless allows for all of the original data to be recovered whenever the file is uncompressed again. Lossy on the other hand reduces a file by permenantly eliminating certain information. When the file is uncompressed, only a part of the original file is recovered.
+3.  JPEG & GIF file formats are lossy while BMP & PNG are lossless formats.
+4.  First, the system updates the file name to signal that it has been deleted and that the file should be recycled. Second, the system moves all of the files FAT clusters to the hard drive's list of free clusters. The actual file data is never touched.
+5.  The most common techniques to properly sanitize a hard drive are:
+    1. Physically destroy the drive.
+    2. Degaussing the drive to randomize the magnetic domains.
+    3. Overwriting the drives data so that it can't be recovered.
+6.  stdint.h is a header file in the C standard library that allows programmers to write code more easily by providing a set of typedefs that specify the exact-width of integer types, along with the the maximum and minimum allowed values for each type.
+7.  uint8_t, uint32_t, int32_t, and uint16_t all specify a specific data size. If the type has a prefix of 'u' it stands for unsigned integer meaning that the type can only represent positive values. If the type does not have a 'u' prefix, the type can represent both positive and negative values.
+    uint8_t - Unsigned | 8 bits/1 byte | 0 - 255
+    uint32_t - Unsigned | 32 bits/4 bytes | 0 - 4.29 million
+    int32_t - Signed | 32 bits/4 bytes | -2.1 million - 2.1 million
+    uint16_t - Unsigned | 16 bits/2 bytes | 0 - 65,535
+8.  BYTE - 1 byte (8 bits)
+    DWORD - 4 bytes (32 bits)
+    LONG - 4 bytes (Signed 32 bits)
+    WORD - 2 bytes (16 bits)
+9.  The beginning of every bitmap file has a bitmap file header. This header helps identify the file. The first two bytes of any BMP file must be "0x42" and "0x4D" which stand for the characters "B" and "M". This tell the program that this is a Bitmap file.
+10. bfSize is the number of bytes required by the bitmap file while biSize the number of bytes required by the bitmap structure.
+11. biHeight is for the height of the bitmap in pixels. If the biHeight is negative, the bitmap is top-down DIB and its origin is the upper-left corner. Otherwise, a positive biHeight means that the bitmap is a bottom-up DIB and its origin is the lower-left corner.
+12. The biBitCount field specifies the number of bits-per-pixel. It determines the number of bits that will define each pixel and the maximum number of colors that will make up the bitmap.
+13. fopen will return NULL if there isn't enough memory to create the file or if the file can't be written into.
+14. The third argument to fread indicates the number of elements. In our code, we only pass in 1 struct in each time to fread.
+15. (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4
+    (4 - (3 * 3)  % 4) % 4
+    (4 - (9) % 4) % 4
+    (4 - 9 % 4) % 4
+    (4 - 1) % 4
+    3 % 4 = 3
+    Padding would be 3.
+16. fseek allows for data to be manipulated by setting the file position of the stream within a file. fseek takes in 3 arguments: the pointer to the file, the number to bytes of offset, and the position to start the offset. These positions can be SEEK_SET (Beginning), SEEK_CUR (Current), and SEEK_END (End).
+17. SEEK_CUR is an integer constant that serves as a potential input for the third argument in fseek. SEEK_CUR specifies that the offset should be added from the current position of the file pointer.
+18. Rick Astley.
