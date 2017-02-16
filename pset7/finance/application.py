@@ -3,7 +3,6 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
-
 from helpers import *
 
 # configure application
@@ -56,7 +55,52 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock."""
-    return apology("TODO")
+
+    if request.method == "POST":
+        # ensure stock input was not blank
+        if not request.form.get("stock"):
+            return apology("Must input Stock Symbol!")
+
+        # ensure the quantity value is an integer
+        try:
+            int(request.form.get("quantity"))
+        except:
+            return apology("Quantity must be a Integer!")
+
+        # ensure quantity is a positive number
+        if int(request.form.get("quantity")) < 1:
+            return apology("Must be a positive number!")
+
+        # lookup stock information from Yahoo (helper method)
+        stock = lookup(request.form.get("stock"))
+
+        # ensure that the input is a valid stock symbol
+        if not stock:
+            return apology("Not a valid stock symbol!")
+
+        cost_of_stock = stock["price"] * float(request.form.get("quantity"))
+
+        user_cash = db.execute("SELECT cash FROM users WHERE id = :id", id=session["user_id"])
+
+        if not cost_of_stock <= user_cash[0]["cash"]:
+            return apology("Not enough cash to purchase stock!")
+
+        stock_exists = db.execute("SELECT * FROM stocks WHERE stock_symbol=:stock_symbol", stock_symbol=stock["symbol"])
+
+        if not stock_exists:
+            stock_exists = db.execute("INSERT INTO stocks (stock_name, stock_symbol) VALUES (:stock_name, :stock_symbol)", stock_name=stock["name"], stock_symbol=stock["symbol"])
+        else:
+            stock_exists = stock_exists[0]["id"]
+
+        db.execute("INSERT INTO transactions (action, transaction_price, shares, stock_id, user_id) VALUES (:action, :transaction_price, :shares, :stock_id, :user_id)", action=0, transaction_price=round(stock["price"], 2), shares=request.form.get("quantity"), stock_id=stock_exists, user_id=session["user_id"])
+
+        db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=round((user_cash[0]["cash"] - cost_of_stock), 2), id=session["user_id"])
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("buy.html")
 
 @app.route("/history")
 @login_required
@@ -134,6 +178,7 @@ def quote():
 
     else:
         return render_template("quote.html")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -231,3 +276,41 @@ def sell():
 
     else:
         return render_template("sell.html")
+
+@app.route("/password", methods=["GET", "POST"])
+def password():
+    """Update user password."""
+
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        if not request.form.get("old_password"):
+            return apology("Must provide Old Password!")
+
+        # ensure password was submitted
+        if not request.form.get("new_password"):
+            return apology("Must provide password!")
+
+        # ensure password matches password confirmation
+        if request.form.get("new_password") != request.form.get("confirmation"):
+            return apology("Passwords don't match!")
+
+        # ensure old password is correctly entered
+        rows = db.execute("SELECT * FROM users WHERE id=:id", id=session["user_id"])
+
+        # ensure username exists and password is correct
+        if len(rows) != 1 or not pwd_context.verify(request.form.get("old_password"), rows[0]["hash"]):
+            return apology("Invalid username and/or password!")
+
+        # Create password hash for new password
+        new_password = pwd_context.encrypt(request.form.get("new_password"))
+
+        # Update password hash in the database
+        db.execute("UPDATE users SET hash=:hash WHERE id=:id", hash=new_password, id=session["user_id"])
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("password.html")
