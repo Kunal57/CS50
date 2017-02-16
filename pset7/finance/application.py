@@ -33,7 +33,24 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("TODO")
+    # return a template to display the stock information
+
+    transactions = db.execute("SELECT stocks.stock_name, stocks.stock_symbol, SUM(transactions.shares) AS shares, SUM(transactions.shares * transactions.transaction_price) AS principle FROM transactions INNER JOIN stocks ON transactions.stock_id=stocks.id WHERE transactions.user_id=:user_id GROUP BY transactions.stock_id", user_id=session["user_id"])
+
+    for stock in transactions:
+        current_stock = lookup(stock["stock_symbol"])
+        stock["current_price"] = current_stock["price"]
+
+    cash = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+
+    cash = cash[0]["cash"]
+
+    grand_total = cash
+
+    for stock in transactions:
+        grand_total += round((stock["shares"] * stock["current_price"]), 2)
+
+    return render_template("portfolio.html", stocks=transactions, cash=cash, grand_total=grand_total)
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
