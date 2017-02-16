@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Stock Quote
+{% endblock %}
+
+{% block main %}
+
+
+
+<div class="table-responsive">
+  <table class="table table-hover table-striped">
+
+    <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Price</th>
+    </tr>
+
+        <tr>
+            <td>{{ stock["symbol"] }}</td>
+            <td>{{ stock["name"] }}</td>
+            <td>{{ stock["price"] | usd() }}</td>
+        </tr>
+  </table>
+</div>
+{% endblock %}

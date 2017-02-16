@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+
+<div class="table-responsive">
+  <table class="table table-hover table-striped">
+
+    <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Shares</th>
+        <th>Current Price</th>
+        <th>TOTAL VALUE</th>
+        <th>GAINS/LOSSES</th>
+    </tr>
+
+    {% for stock in stocks %}
+        <tr>
+            <td>{{ stock["stock_symbol"] }}</td>
+            <td>{{ stock["stock_name"] }}</td>
+            <td>{{ stock["shares"] }}</td>
+            <td>{{ stock["current_price"]| usd() }}</td>
+            <td>{{ (stock["shares"] * stock["current_price"]) | round(2)| usd() }}</td>
+            <td>{{ ((stock["shares"] * stock["current_price"]) - stock["principle"]) | round(2) }}</td>
+        </tr>
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><strong>CASH</strong></td>
+        <td>{{ cash | usd() }}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><strong>GRAND TOTAL</strong></td>
+        <td>{{ grand_total | usd() }}</td>
+    </tr>
+  </table>
+</div>
+
+{% endblock %}

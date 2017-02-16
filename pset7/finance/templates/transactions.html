@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+
+<div class="table-responsive">
+  <table class="table table-hover table-striped">
+
+    <tr>
+        <th>Time</th>
+        <th>Action</th>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Shares</th>
+        <th>Price</th>
+        <th>TOTAL</th>
+    </tr>
+
+    {% for stock in stocks %}
+        <tr>
+            <td>{{ stock["datetime"] }}</td>
+            {% if stock["action"] == 0 %}
+                <td>BUY</td>
+            {% else %}
+                <td>SELL</td>
+            {% endif %}
+            <td>{{ stock["stock_symbol"] }}</td>
+            <td>{{ stock["stock_name"] }}</td>
+            <td>{{ stock["shares"]|abs() }}</td>
+            <td>{{ stock["transaction_price"] | usd() }}</td>
+            <td>{{ (stock["shares"] * stock["transaction_price"]) | round(2) | abs() | usd() }}</td>
+        </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}
