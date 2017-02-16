@@ -180,4 +180,51 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock."""
-    return apology("TODO")
+
+    if request.method == "POST":
+        # ensure stock input was not blank
+        if not request.form.get("stock"):
+            return apology("Must input Stock Symbol!")
+
+        # ensure the quantity value is an integer
+        try:
+            int(request.form.get("quantity"))
+        except:
+            return apology("Quantity must be a Integer!")
+
+        # ensure a positive quantity is entered
+        if int(request.form.get("quantity")) < 1:
+            return apology("Must be a positive number!")
+
+        # lookup stock information from Yahoo (helper method)
+        stock = lookup(request.form.get("stock"))
+
+        # ensure that the input is a valid stock symbol
+        if not stock:
+            return apology("Not a valid stock symbol!")
+
+        user_has_stock = db.execute("SELECT stocks.id, SUM(transactions.shares) AS shares FROM transactions INNER JOIN stocks ON transactions.stock_id=stocks.id WHERE transactions.user_id=:user_id AND stocks.stock_symbol=:stock_symbol GROUP BY stocks.stock_symbol", user_id=session["user_id"], stock_symbol=stock["symbol"])
+
+        if not user_has_stock:
+            return apology("You Do Not Have Any Shares!")
+
+        if user_has_stock[0]["shares"] < int(request.form.get("quantity")):
+            return apology("You Do Not Have That Many Shares!")
+
+        cost_of_stock = stock["price"] * float(request.form.get("quantity"))
+
+        user_cash = db.execute("SELECT cash FROM users WHERE id = :id", id=session["user_id"])
+
+        shares_sold = -1 * int(request.form.get("quantity"))
+
+        print("{}".format(shares_sold))
+
+        db.execute("INSERT INTO transactions (action, transaction_price, shares, stock_id, user_id) VALUES (:action, :transaction_price, :shares, :stock_id, :user_id)", action=1, transaction_price=round(stock["price"], 2), shares=shares_sold, stock_id=user_has_stock[0]["id"], user_id=session["user_id"])
+
+        db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=round((user_cash[0]["cash"] + cost_of_stock), 2), id=session["user_id"])
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("sell.html")
