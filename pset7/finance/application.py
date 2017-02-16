@@ -101,7 +101,46 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user."""
-    return apology("TODO")
+
+    # forget any user_id
+    session.clear()
+
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # ensure username was submitted
+        if not request.form.get("username"):
+            return apology("Must have username!")
+
+        # ensure username is unique
+        unique_user = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        if unique_user:
+            return apology("Username must be unique!")
+
+        # ensure password was submitted
+        if not request.form.get("password"):
+            return apology("Must provide password!")
+
+        # ensure password matches password confirmation
+        if request.form.get("password") != request.form.get("confirmation"):
+            return apology("Passwords don't match!")
+        else:
+            # hash password
+            hashed_password = pwd_context.encrypt(request.form.get("password"))
+
+        # Insert user into the database
+        new_user = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=request.form.get("username"), hash=hashed_password)
+
+        # remember which user has logged in
+        # INSERT INTO returns the id of the user to the variable new_user
+        session["user_id"] = new_user
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
