@@ -184,7 +184,12 @@ function configure()
  */
 function removeMarkers()
 {
-    // TODO
+    // loop through global markers variable and deassign it from the map
+    for(let marker of markers){
+        marker.setMap(null);
+    }
+    // empty the markers array
+    markers.length = 0;
 }
 
 /**
