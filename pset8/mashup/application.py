@@ -32,9 +32,14 @@ def index():
 @app.route("/articles")
 def articles():
     """Look up articles for geo."""
+    # grab the passed in parameter
+    geo = request.args.get("geo")
 
-    # TODO
-    return jsonify([])
+    # pass geo into lookup(helper) to get a list of objects with links and titles
+    articles = lookup(geo)
+
+    # jsonify the list
+    return jsonify(articles)
 
 @app.route("/search")
 def search():
