@@ -63,7 +63,51 @@ $(function() {
  */
 function addMarker(place)
 {
-    // TODO
+    // a LatLng object that takes my lat and long and puts it into an object
+    var myLatlng = new google.maps.LatLng(place.latitude, place.longitude);
+    // creates a marker with a position and title
+    var marker = new google.maps.Marker({
+        position: myLatlng,
+        title: place.place_name
+    });
+    // assigns the marker to a map
+    marker.setMap(map);
+
+    // marker listens and opens if it is clicked on
+    google.maps.event.addListener(marker, 'click', function() {
+
+        // get places matching geo (asynchronously)
+        var parameters = {
+            geo: place.postal_code
+        };
+
+        // Send the parameters to the articles route to get JSON data back
+        $.getJSON(Flask.url_for("articles"), parameters)
+        .done(function(data, textStatus, jqXHR) {
+
+            // create a HTML list to show in the infoWindow with articles titles and links
+            var content = '<div id="content"><ul>';
+            if (data.length > 5){
+                data = data.slice(0,4);
+            }
+            for(let item of data){
+                content += '<li><a href='+item.link+'>'+item.title+'</a></li>';
+            }
+            content += '</ul></div>';
+
+            showInfo(marker, content);
+
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // log error to browser's console
+            console.log(errorThrown.toString());
+        });
+
+
+    });
+
+    // store all the markers of thiis map in an array to delete after the position changes (see RemoveMarkers below)
+    markers.push(marker);
 }
 
 /**
