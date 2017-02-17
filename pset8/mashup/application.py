@@ -45,8 +45,14 @@ def articles():
 def search():
     """Search for places that match query."""
 
-    # TODO
-    return jsonify([])
+    # get the paramter "q", remove commas, and add a % at the end (SQL Wildcard)
+    q = request.args.get("q").replace(",","") + "%"
+
+    # searcg database for postal_codes or place_name that matches "q"
+    places = db.execute("SELECT * FROM places WHERE postal_code LIKE :q OR place_name LIKE :q", q=q)
+
+    # return the results in a json object
+    return jsonify(places)
 
 @app.route("/update")
 def update():
